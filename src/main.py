@@ -1,9 +1,10 @@
 """
 Main entry point for the Opera Research Agentic System.
+Uses the compliant scraper with ethical web scraping practices.
 """
 import os
 from dotenv import load_dotenv
-from scraping.scraper import OperaScraper
+from scraping.compliant_scraper import CompliantOperaScraper
 import logging
 
 # Load environment variables
@@ -20,8 +21,20 @@ def main():
     """Main application entry point."""
     logger.info("Starting Opera Research Agentic System")
 
-    # Initialize scraper
-    scraper = OperaScraper()
+    # Initialize compliant scraper with ethical defaults
+    scraper = CompliantOperaScraper(
+        user_agent=os.getenv('SCRAPER_USER_AGENT', 'OperaResearchBot/1.0'),
+        contact_info=os.getenv(
+            'SCRAPER_CONTACT_INFO',
+            'https://github.com/austinkness/opera-research-agentic-system'
+        ),
+        respect_robots_txt=True,
+        enable_rate_limiting=True,
+        enable_caching=True,
+        requests_per_second=float(os.getenv('REQUESTS_PER_SECOND', '1.0')),
+        min_delay_seconds=float(os.getenv('MIN_DELAY_SECONDS', '2.0')),
+        cache_ttl_seconds=int(os.getenv('CACHE_TTL_SECONDS', '86400'))
+    )
 
     # Example opera companies to scrape
     opera_companies = [
@@ -51,6 +64,13 @@ def main():
     print(f"Total sites: {len(results)}")
     print(f"Successful: {successful}")
     print(f"Failed: {len(results) - successful}")
+
+    # Show compliance statistics
+    stats = scraper.get_stats()
+    print(f"\n=== Compliance Statistics ===")
+    print(f"Cache hit rate: {stats['cache_hit_rate']}%")
+    print(f"Robots.txt blocks: {stats['robots_blocked']}")
+    print(f"Total requests: {stats['total_requests']}")
 
 
 if __name__ == "__main__":
