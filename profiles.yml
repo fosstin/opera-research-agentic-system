@@ -1,0 +1,26 @@
+# dbt profiles configuration for opera_research
+
+dbt_opera:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: austinkness
+      password: ""
+      port: 5432
+      dbname: opera_research
+      schema: analytics
+      threads: 4
+      keepalives_idle: 0
+
+    prod:
+      type: postgres
+      host: localhost
+      user: austinkness
+      password: ""
+      port: 5432
+      dbname: opera_research
+      schema: analytics
+      threads: 8
+      keepalives_idle: 0

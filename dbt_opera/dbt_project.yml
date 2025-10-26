@@ -1,0 +1,59 @@
+# dbt_opera project configuration
+
+name: 'dbt_opera'
+version: '1.0.0'
+config-version: 2
+
+# Project profile (references profiles.yml)
+profile: 'dbt_opera'
+
+# Directories
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+  - "logs"
+
+# Model configurations
+models:
+  dbt_opera:
+    # Staging models: Materialize as views (lightweight)
+    staging:
+      +materialized: view
+      +schema: staging
+
+    # Core models: Materialize as tables (queryable)
+    core:
+      +materialized: table
+      +schema: core
+
+    # Analytics models: Materialize as tables (BI layer)
+    analytics:
+      +materialized: table
+      +schema: analytics
+
+# Seeds configuration
+seeds:
+  dbt_opera:
+    +schema: seeds
+
+# Documentation
+on-run-start:
+  - "{{ log('dbt_opera: Starting transformation pipeline', info=True) }}"
+
+on-run-end:
+  - "{{ log('dbt_opera: Transformation pipeline complete', info=True) }}"
+
+# Variables
+vars:
+  # Current season for filtering
+  current_season: "2024-2025"
+
+  # Data quality thresholds
+  min_confidence_score: 0.7

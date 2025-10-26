@@ -1,0 +1,56 @@
+version: 2
+
+sources:
+  - name: staging
+    description: Raw staging tables from scraping and LLM extraction
+    database: opera_research
+    schema: public
+    tables:
+      - name: stg_scraped_pages
+        description: Raw HTML scraped from opera company websites
+        columns:
+          - name: id
+            description: Primary key
+            data_tests:
+              - unique
+              - not_null
+          - name: url
+            description: Source URL
+            data_tests:
+              - not_null
+              - unique
+          - name: is_processed
+            description: Whether LLM extraction has been performed
+
+      - name: stg_llm_extractions
+        description: Structured data extracted by LLM
+        columns:
+          - name: id
+            description: Primary key
+            data_tests:
+              - unique
+              - not_null
+          - name: scraped_page_id
+            description: Foreign key to stg_scraped_pages
+            data_tests:
+              - not_null
+          - name: is_validated
+            description: Whether extraction passed validation
+          - name: confidence_score
+            description: LLM confidence score (0.0 to 1.0)
+
+models:
+  - name: stg_validated_extractions
+    description: Validated LLM extractions ready for transformation
+    columns:
+      - name: extraction_id
+        description: Unique extraction ID
+        data_tests:
+          - unique
+          - not_null
+      - name: url
+        description: Source URL
+      - name: confidence_score
+        description: Extraction confidence
+      - name: productions_data
+        description: Array of extracted productions
