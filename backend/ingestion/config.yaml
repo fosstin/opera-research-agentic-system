@@ -1,0 +1,228 @@
+# Opera Research Platform - Scraping & Ingestion Configuration
+
+# Scraping Configuration
+scraping:
+  # User agent - must include contact info for compliance
+  user_agent: "OperaResearchBot/1.0"
+  contact_info: "https://github.com/austinkness/opera-research-agentic-system"
+
+  # Rate limiting (polite scraping)
+  requests_per_second: 1.0
+  min_delay_seconds: 2.0
+  max_concurrent_requests: 3
+
+  # Timeout settings
+  request_timeout_seconds: 30
+  page_load_timeout_seconds: 60
+
+  # Compliance
+  respect_robots_txt: true
+  cache_enabled: true
+  cache_ttl_seconds: 86400  # 24 hours
+
+  # Retry logic
+  max_retries: 3
+  retry_delay_seconds: 5
+  backoff_factor: 2  # Exponential backoff
+
+# Target opera companies
+companies:
+  tier_1:
+    - name: "Metropolitan Opera"
+      domain: "metopera.org"
+      base_url: "https://www.metopera.org"
+      season_url_pattern: "/season/{season}/"
+      enabled: true
+      priority: 1
+
+    - name: "Royal Opera House"
+      domain: "roh.org.uk"
+      base_url: "https://www.roh.org.uk"
+      season_url_pattern: "/seasons/{season}/"
+      enabled: true
+      priority: 1
+
+    - name: "Wiener Staatsoper"
+      domain: "wiener-staatsoper.at"
+      base_url: "https://www.wiener-staatsoper.at"
+      season_url_pattern: "/en/season/{season}/"
+      enabled: true
+      priority: 1
+
+    - name: "Teatro alla Scala"
+      domain: "teatroallascala.org"
+      base_url: "https://www.teatroallascala.org"
+      season_url_pattern: "/en/season/{season}/"
+      enabled: true
+      priority: 1
+
+    - name: "Paris Opera"
+      domain: "operadeparis.fr"
+      base_url: "https://www.operadeparis.fr"
+      season_url_pattern: "/en/season/{season}/"
+      enabled: true
+      priority: 1
+
+  tier_2:
+    - name: "San Francisco Opera"
+      domain: "sfopera.com"
+      base_url: "https://sfopera.com"
+      enabled: true
+      priority: 2
+
+    - name: "Lyric Opera of Chicago"
+      domain: "lyricopera.org"
+      base_url: "https://www.lyricopera.org"
+      enabled: true
+      priority: 2
+
+# LLM Extraction Configuration
+extraction:
+  # Model selection
+  default_model: "gpt-4-turbo-preview"
+  fallback_model: "gpt-3.5-turbo"
+  alternative_provider: "gemini-pro"
+
+  # Model parameters
+  temperature: 0.0  # Deterministic extraction
+  max_tokens: 4000
+
+  # Confidence thresholds
+  min_confidence_score: 0.70
+  manual_review_threshold: 0.85
+
+  # Retry logic for failed extractions
+  max_extraction_retries: 2
+  use_fallback_on_error: true
+
+  # Cost management
+  max_cost_per_page_usd: 0.10
+  daily_budget_usd: 50.00
+
+  # Extraction schemas (fields to extract)
+  production_schema:
+    required_fields:
+      - opera_title
+      - composer
+      - premiere_date
+    optional_fields:
+      - conductor
+      - director
+      - cast_members
+      - ticket_prices
+      - venue
+      - synopsis
+      - reviews
+
+  cast_schema:
+    required_fields:
+      - performer_name
+      - role_name
+    optional_fields:
+      - voice_type
+      - performance_dates
+      - understudy_info
+
+# Data Quality Configuration
+data_quality:
+  # Validation rules
+  validation_enabled: true
+  auto_correction_enabled: false  # Require manual review for corrections
+
+  # Quality scoring weights
+  quality_score_weights:
+    completeness: 0.40
+    accuracy: 0.35
+    consistency: 0.15
+    timeliness: 0.10
+
+  # Deduplication
+  duplicate_detection_enabled: true
+  similarity_threshold: 0.90
+
+  # Change detection
+  track_changes: true
+  alert_on_major_changes: true
+
+# Database Configuration
+database:
+  # Connection pooling
+  pool_size: 5
+  max_overflow: 10
+  pool_pre_ping: true
+
+  # Batch processing
+  batch_size: 100
+  bulk_insert_enabled: true
+
+  # Staging layer behavior
+  staging_retention_days: 30
+  auto_cleanup_enabled: true
+
+# dbt Configuration
+dbt:
+  profiles_dir: "./dbt_opera"
+  project_dir: "./dbt_opera"
+  target: "dev"
+
+  # Execution
+  threads: 4
+  full_refresh: false
+
+  # Testing
+  run_tests_after_models: true
+  fail_on_test_failure: true
+
+  # Materialization
+  default_materialization: "table"
+  incremental_strategy: "merge"
+
+# Scheduling (for Prefect/orchestration)
+scheduling:
+  # Scraping schedule
+  daily_scrape_time: "02:00"  # 2 AM
+  weekly_full_rescrape_day: "sunday"
+
+  # dbt runs
+  dbt_run_time: "04:00"  # After scraping completes
+  dbt_test_time: "05:00"  # After transformations
+
+  # Maintenance
+  cleanup_time: "01:00"  # Before scraping
+  backup_time: "06:00"   # After all processing
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "json"  # Structured logging
+
+  # Log destinations
+  console_enabled: true
+  file_enabled: true
+  log_dir: "./logs"
+
+  # Retention
+  log_retention_days: 30
+  rotate_logs_daily: true
+
+  # Monitoring
+  sentry_enabled: false
+  sentry_dsn: ""  # Add if using Sentry
+
+# Feature Flags
+features:
+  vector_search_enabled: false  # Future feature
+  semantic_similarity_enabled: false  # Future feature
+  llm_agent_enabled: false  # Future feature
+  tableau_mcp_enabled: false  # Future feature
+  real_time_updates_enabled: false  # Future feature
+
+# Development/Production Settings
+environment: "development"  # Options: development, staging, production
+
+# Development overrides
+dev_overrides:
+  max_pages_per_company: 5  # Limit for testing
+  skip_expensive_operations: true
+  use_cache_aggressively: true
+  mock_llm_responses: false

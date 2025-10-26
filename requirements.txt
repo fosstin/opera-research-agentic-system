@@ -22,6 +22,11 @@ matplotlib>=3.8.0
 seaborn>=0.13.0
 plotly>=5.18.0
 
+# API Framework
+fastapi>=0.108.0
+uvicorn[standard]>=0.25.0
+python-multipart>=0.0.6
+
 # Database & ORM
 psycopg2-binary>=2.9.9
 sqlalchemy>=2.0.0
@@ -33,6 +38,9 @@ dbt-postgres>=1.7.0
 
 # Workflow Orchestration
 prefect>=2.14.0
+
+# Vector Database (Optional)
+chromadb>=0.4.18
 
 # Environment Management
 python-dotenv>=1.0.0
